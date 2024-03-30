@@ -1,0 +1,5 @@
+asyncio
+feedparser
+Mastodon
+requests
+python-dateutil
