@@ -10,7 +10,7 @@ from dateutil.parser import parse
 
 # Anpassbare Variablen
 api_base_url = 'https://mstdn.animexx.de'  # Die Basis-URL Ihrer Mastodon-Instanz
-access_token = 'yourTOKEN' #Ihr Access-Token
+access_token = 'API_KEY' #Ihr Access-Token
 feed_url = 'http://fetchrss.com/rss/6607f2e1d3469f6e5c14a2e26607f1c23da0c10d47218b12.atom'  # URL des RSS-Feeds hier einfügen
     
 def fetch_feed_entries(feed_url):
@@ -71,7 +71,6 @@ def main(feed_entries):
     )
     # Liste zum Speichern der entry_ids
     saved_entry_ids = []
-    actual_entry_ids = []
     
     # Öffne die Datei zum Lesen der gespeicherten entry_ids
     try:
@@ -82,6 +81,8 @@ def main(feed_entries):
         # Datei nicht gefunden, erstelle eine neue
         with open("Mastodon.crunchy.bot.dat", "w") as file:
             pass
+            
+    print(saved_entry_ids)
 
     for entry in feed_entries:
         title = str(entry.get('title', ''))
@@ -144,14 +145,19 @@ def main(feed_entries):
                 post_tweet(mastodon, message)
                 
             #Füge die entry_id zur Liste der gespeicherten entry_ids hinzu
-            actual_entry_ids.append(entry_id)
-        # Öffne die Datei im Schreibmodus (w für write)
-        with open('Mastodon.crunchy.bot.dat', 'w') as file:
-            # Schreibe jede entry_id gefolgt von einem Zeilenumbruch in die Datei
-            for entry_id in actual_entry_ids:
-                file.write(str(entry_id) + '\n')
+            saved_entry_ids.append(entry_id)
+            
+            # Stelle sicher, dass nur die neuesten 5 Einträge behalten werden
+            if len(saved_entry_ids) > 5:
+                saved_entry_ids = saved_entry_ids[-5:]
     
-    time.sleep(300)
+    # Öffne die Datei im Schreibmodus (w für write)
+    with open('Mastodon.crunchy.bot.dat', 'w') as file:
+        # Schreibe jede entry_id gefolgt von einem Zeilenumbruch in die Datei
+        for entry_id in saved_entry_ids:
+            file.write(str(entry_id) + '\n')
+    
+    time.sleep(900)
 
 # Hauptprogramm (z.B. wo der Bot aufgerufen wird)
 if __name__ == "__main__":
