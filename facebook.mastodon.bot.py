@@ -1,4 +1,3 @@
-import asyncio
 import feedparser
 from mastodon import Mastodon
 from tempfile import NamedTemporaryFile
