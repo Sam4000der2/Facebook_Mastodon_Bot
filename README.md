@@ -3,6 +3,11 @@
 ## Overview:
 This script allows you to mirror content from a Facebook page to Mastodon using an RSS feed. It posts updates from the specified Facebook page to your Mastodon instance automatically.
 
+The file `facebook.mastodon.bot.py` is the general template.
+
+The files `crunchyroll.de.bot.py` and `crunchyroll.en.bot.py` are the real running bot_scripts, of course without the API keys.
+
+
 ## How to Use:
 1. **Installation:**
    - Make sure you have Python installed on your system.
