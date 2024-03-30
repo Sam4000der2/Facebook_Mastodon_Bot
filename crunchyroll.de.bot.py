@@ -156,5 +156,6 @@ def main(feed_entries):
 
 # Hauptprogramm (z.B. wo der Bot aufgerufen wird)
 if __name__ == "__main__":
-    feed_entries = fetch_feed_entries(feed_url)
-    main(feed_entries)
+    while True:  # Endlosschleife
+        feed_entries = fetch_feed_entries(feed_url)
+        main(feed_entries)
