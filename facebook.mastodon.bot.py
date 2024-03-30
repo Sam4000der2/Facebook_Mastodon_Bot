@@ -71,7 +71,6 @@ def main(feed_entries):
     )
     # List to store the entry_ids
     saved_entry_ids = []
-    actual_entry_ids = []
     
     # Open the file to read the saved entry_ids
     try:
@@ -119,7 +118,7 @@ def main(feed_entries):
             # Output timestamp in desired format
             posted_time = posted_time_local.strftime(desired_format)
             
-            bild_gefunden = False
+            image_found = False
             
             if content:  # Check if image_url is not empty
                 content_string = content[0].get('value', '')  # Extract the URL from the first element of the list
@@ -128,14 +127,14 @@ def main(feed_entries):
             
             if image_url:  # Check if image_url is not empty
                 image_url_string = image_url[0].get('url', '')  # Extract the URL from the first element of the list
-                bild_gefunden = True
+                image_found = True
 
                 
             clean_content = clean_content_keep_links(content_string)
             clean_content = clean_content.replace("(Feed generated with FetchRSS)", "") 
             message = f"{clean_content} \n\n #YOURHASHTAGS \n\n{posted_time}\n\nLink to original post: {scr_link}"
 
-            if bild_gefunden:
+            if image_found:
                 #print (images)
                 #print (message)
                 post_tweet_with_images(mastodon, message, image_url_string)
@@ -144,14 +143,19 @@ def main(feed_entries):
                 post_tweet(mastodon, message)
                 
             # Add the entry_id to the list of saved entry_ids
-            actual_entry_ids.append(entry_id)
-        # Open the file in write mode ('w' for write)
-        with open('facebook.mastodon.bot.dat', 'w') as file:
-            # Write each entry_id followed by a newline character to the file
-            for entry_id in actual_entry_ids:
-                file.write(str(entry_id) + '\n')
+            saved_entry_ids.append(entry_id)
+            
+            # Stelle sicher, dass nur die neuesten 5 Einträge behalten werden
+            if len(saved_entry_ids) > 5:
+                saved_entry_ids = saved_entry_ids[-5:]
     
-    time.sleep(300)
+    # Open the file in write mode (w for write)
+    with open('Mastodon.crunchy.bot.dat', 'w') as file:
+        # Write each entry_id followed by a line break in the file
+        for entry_id in saved_entry_ids:
+            file.write(str(entry_id) + '\n')
+    
+    time.sleep(900)
 
 # Main program (where the bot is invoked)
 if __name__ == "__main__":
