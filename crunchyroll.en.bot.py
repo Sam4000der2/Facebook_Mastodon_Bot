@@ -9,7 +9,7 @@ import datetime
 from dateutil.parser import parse
 
 # Customizable Variables
-api_base_url = 'https://urusai.social'  # The base URL of your Mastodon instance
+api_base_url = 'https://botsin.space'  # The base URL of your Mastodon instance
 access_token = 'yourTOKEN' # Your access token
 feed_url = 'https://fetchrss.com/rss/6608692efac5834576331a82660868f40f8d3458ab64bde2.xml'  # Insert RSS feed URL here, I used fetchrss.
     
