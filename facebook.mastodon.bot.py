@@ -145,7 +145,7 @@ def main(feed_entries):
             # Add the entry_id to the list of saved entry_ids
             saved_entry_ids.append(entry_id)
             
-            # Stelle sicher, dass nur die neuesten 5 Einträge behalten werden
+            # Make sure that only the latest 5 entries are kept
             if len(saved_entry_ids) > 5:
                 saved_entry_ids = saved_entry_ids[-5:]
     
