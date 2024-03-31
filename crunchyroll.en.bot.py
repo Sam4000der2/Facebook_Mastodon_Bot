@@ -7,11 +7,20 @@ import requests
 import time
 import datetime
 from dateutil.parser import parse
+from bs4 import BeautifulSoup
 
 # Customizable Variables
 api_base_url = 'https://sakurajima.moe'  # The base URL of your Mastodon instance
-access_token = 'apikey' # Your access token
+access_token = 'APIKEY' # Your access token
 feed_url = 'https://fetchrss.com/rss/6608692efac5834576331a82660868f40f8d3458ab64bde2.xml'  # Insert RSS feed URL here, I used fetchrss.
+    
+def extract_images_from_content(content):
+    # Parse the content to extract image URLs
+    soup = BeautifulSoup(content, 'html.parser')
+    image_urls = []
+    for img_tag in soup.find_all('img'):
+        image_urls.append(img_tag['src'])
+    return image_urls
     
 def fetch_feed_entries(feed_url):
     # Parse the RSS feed and extract the entries
@@ -24,26 +33,30 @@ def post_tweet(mastodon, message):
     message_cut = truncate_text(message)
     mastodon.status_post(message_cut, visibility='public')
 
-def post_tweet_with_images(mastodon, message, image_url_string):
+def post_tweet_with_images(mastodon, message, image_urls):
     # Post the message with one or more images on Mastodon
     message_cut = truncate_text(message)
     
     # Upload the images and get the media IDs
     media_ids = []
+    image_paths = []
     
-    with NamedTemporaryFile(delete=False) as tmp_file:
-            response = requests.get(image_url_string)
+    for image_url in image_urls:
+        with NamedTemporaryFile(delete=False) as tmp_file:
+            response = requests.get(image_url)
             tmp_file.write(response.content)
             image_path = tmp_file.name
 
-    with open(image_path, 'rb') as image_file:
-                media_info = mastodon.media_post(image_file, description="Source: Crunchyroll Facebook Page. Unfortunately, no automatic image description available.", mime_type='image/jpeg')
-                media_ids.append(media_info['id'])
+        with open(image_path, 'rb') as image_file:
+            media_info = mastodon.media_post(image_file, description="Source: Crunchyroll Facebook Page. Unfortunately, no automatic image description available.", mime_type='image/jpeg')
+            media_ids.append(media_info['id'])
+            
     # Post the message with the attached images
     mastodon.status_post(message_cut, media_ids=media_ids, visibility='public')
     
-    # Delete temporary file
-    os.unlink(image_path)
+     # Delete temporary files
+    for image_path in image_paths:
+        os.unlink(image_path)
 
 def truncate_text(text):
     # Check if the text is longer than 500 characters
@@ -83,24 +96,20 @@ def main(feed_entries):
             pass
 
     for entry in feed_entries:
-        #title = str(entry.get('title', ''))
-        #content = entry.get('content', '')
-        #author = str(entry.get('author', ''))
-        #updated = str(entry.get('updated', ''))
-        #scr_link = str(entry.get('link', ''))
-        #image_url = entry.get('media_content', '')
         
         title = entry.get('title', '')
         scr_link = entry.get('link', '')
         content = entry.get('description', '')
         updated = entry.get('published', '')
         creator = entry.get('author', '')
-        media_content = entry.get('media_content', None)
-        media_url = None
+        #media_content = entry.get('media_content', None)
+        
+        image_urls = extract_images_from_content(content)
+        #media_url = None
         image_found = False
-        if media_content:
-            image_url = media_content[0].get('url', '')
-            image_found = True
+        
+        if image_urls:
+           image_found = True 
         
         # Extract the numbers at the end of the URL
         match = re.search(r'\d+$', scr_link)
@@ -136,9 +145,9 @@ def main(feed_entries):
             message = f"{clean_content} \n\n#crunchyroll #Anime\n\n{posted_time} (UTC)\n\nLink to original post: {scr_link}"
 
             if image_found:
-                #print (image_url)
+                #print (image_urls)
                 #print (message)
-                post_tweet_with_images(mastodon, message, image_url)
+                post_tweet_with_images(mastodon, message, image_urls)
             else:
                 #print(message)
                 post_tweet(mastodon, message)
