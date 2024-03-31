@@ -2,3 +2,4 @@ feedparser
 Mastodon
 requests
 python-dateutil
+BeautifulSoup
