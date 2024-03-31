@@ -9,8 +9,8 @@ import datetime
 from dateutil.parser import parse
 
 # Customizable Variables
-api_base_url = 'https://botsin.space'  # The base URL of your Mastodon instance
-access_token = 'yourTOKEN' # Your access token
+api_base_url = 'https://sakurajima.moe'  # The base URL of your Mastodon instance
+access_token = 'apikey' # Your access token
 feed_url = 'https://fetchrss.com/rss/6608692efac5834576331a82660868f40f8d3458ab64bde2.xml'  # Insert RSS feed URL here, I used fetchrss.
     
 def fetch_feed_entries(feed_url):
@@ -74,26 +74,39 @@ def main(feed_entries):
     
     # Open the file to read the saved entry_ids
     try:
-        with open("facebook.mastodon.bot.dat", "r") as file:
+        with open("Mastodon.crunchy.en.bot.dat", "r") as file:
             for line in file:
                 saved_entry_ids.append(line.strip())
     except FileNotFoundError:
         # File not found, create a new one
-        with open("facebook.mastodon.bot.dat", "w") as file:
+        with open("Mastodon.crunchy.en.bot.dat", "w") as file:
             pass
 
     for entry in feed_entries:
-        title = str(entry.get('title', ''))
-        content = entry.get('content', '')
-        author = str(entry.get('author', ''))
-        updated = str(entry.get('updated', ''))
-        scr_link = str(entry.get('link', ''))
-        image_url = entry.get('media_content', '')
+        #title = str(entry.get('title', ''))
+        #content = entry.get('content', '')
+        #author = str(entry.get('author', ''))
+        #updated = str(entry.get('updated', ''))
+        #scr_link = str(entry.get('link', ''))
+        #image_url = entry.get('media_content', '')
+        
+        title = entry.get('title', '')
+        scr_link = entry.get('link', '')
+        content = entry.get('description', '')
+        updated = entry.get('published', '')
+        creator = entry.get('author', '')
+        media_content = entry.get('media_content', None)
+        media_url = None
+        image_found = False
+        if media_content:
+            image_url = media_content[0].get('url', '')
+            image_found = True
         
         # Extract the numbers at the end of the URL
         match = re.search(r'\d+$', scr_link)
         if match:
             entry_id = match.group()
+            #entry_id = ""
         else: 
             entry_id = ""
         
@@ -118,26 +131,14 @@ def main(feed_entries):
             # Output timestamp in desired format
             posted_time = posted_time_local.strftime(desired_format)
             
-            image_found = False
-            
-            if content:  # Check if image_url is not empty
-                content_string = content[0].get('value', '')  # Extract the URL from the first element of the list
-            else:
-                content_string = ""
-            
-            if image_url:  # Check if image_url is not empty
-                image_url_string = image_url[0].get('url', '')  # Extract the URL from the first element of the list
-                image_found = True
-
-                
-            clean_content = clean_content_keep_links(content_string)
+            clean_content = clean_content_keep_links(content)
             clean_content = clean_content.replace("(Feed generated with FetchRSS)", "") 
-            message = f"{clean_content} \n\n#crunchyroll\n\n{posted_time} (UTC)\n\nLink to original post: {scr_link}"
+            message = f"{clean_content} \n\n#crunchyroll #Anime\n\n{posted_time} (UTC)\n\nLink to original post: {scr_link}"
 
             if image_found:
-                #print (images)
+                #print (image_url)
                 #print (message)
-                post_tweet_with_images(mastodon, message, image_url_string)
+                post_tweet_with_images(mastodon, message, image_url)
             else:
                 #print(message)
                 post_tweet(mastodon, message)
@@ -150,7 +151,7 @@ def main(feed_entries):
                 saved_entry_ids = saved_entry_ids[-5:]
     
     # Open the file in write mode (w for write)
-    with open('Mastodon.crunchy.bot.dat', 'w') as file:
+    with open('Mastodon.crunchy.en.bot.dat', 'w') as file:
         # Write each entry_id followed by a line break in the file
         for entry_id in saved_entry_ids:
             file.write(str(entry_id) + '\n')
