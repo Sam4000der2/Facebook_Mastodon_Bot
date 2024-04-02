@@ -10,7 +10,7 @@ from dateutil.parser import parse
 
 # Anpassbare Variablen
 api_base_url = 'https://mstdn.animexx.de'  # Die Basis-URL Ihrer Mastodon-Instanz
-access_token = 'API_KEY' #Ihr Access-Token
+access_token = 'api_key' #Ihr Access-Token
 feed_url = 'http://fetchrss.com/rss/6607f2e1d3469f6e5c14a2e26607f1c23da0c10d47218b12.atom'  # URL des RSS-Feeds hier einfügen
     
 def fetch_feed_entries(feed_url):
@@ -22,7 +22,7 @@ def fetch_feed_entries(feed_url):
 def post_tweet(mastodon, message):
     # Veröffentliche den Tweet auf Mastodon
     message_cut = truncate_text(message)
-    mastodon.status_post(message_cut, visibility='private')
+    mastodon.status_post(message_cut, visibility='public')
 
 def post_tweet_with_images(mastodon, message, image_url_string):
     # Veröffentliche den Beitrag mit einem oder mehreren Bildern auf Mastodon
@@ -40,7 +40,7 @@ def post_tweet_with_images(mastodon, message, image_url_string):
                 media_info = mastodon.media_post(image_file, description="Quelle: Crunchyroll Facebook Seite. Leider keine automatische Bildbeschreigung möglich", mime_type='image/jpeg')
                 media_ids.append(media_info['id'])
     # Veröffentliche den Beitrag mit den angehängten Bildern
-    mastodon.status_post(message_cut, media_ids=media_ids, visibility='private')
+    mastodon.status_post(message_cut, media_ids=media_ids, visibility='public')
     
     # Temporäre Datei löschen
     os.unlink(image_path)
@@ -82,8 +82,8 @@ def main(feed_entries):
         with open("Mastodon.crunchy.bot.dat", "w") as file:
             pass
             
-    print(saved_entry_ids)
-
+   #print(saved_entry_ids)
+    entry_found = False
     for entry in feed_entries:
         title = str(entry.get('title', ''))
         content = entry.get('content', '')
@@ -101,7 +101,9 @@ def main(feed_entries):
         
         # Prüfe, ob die entry_id bereits gespeichert ist
         if entry_id not in saved_entry_ids:
-        
+            
+            entry_found = True
+            
             # Zeitstempel parsen
             posted_time_utc = parse(updated)
 
@@ -150,15 +152,20 @@ def main(feed_entries):
             # Stelle sicher, dass nur die neuesten 5 Einträge behalten werden
             if len(saved_entry_ids) > 5:
                 saved_entry_ids = saved_entry_ids[-5:]
-    
-    # Öffne die Datei im Schreibmodus (w für write)
-    with open('Mastodon.crunchy.bot.dat', 'w') as file:
-        # Schreibe jede entry_id gefolgt von einem Zeilenumbruch in die Datei
-        for entry_id in saved_entry_ids:
-            file.write(str(entry_id) + '\n')
-    
-    time.sleep(900)
+            
+        
+        time.sleep(1500)
+        
+    if entry_found:
+        # Öffne die Datei im Schreibmodus (w für write)
+        with open('Mastodon.crunchy.bot.dat', 'w') as file:
+            # Schreibe jede entry_id gefolgt von einem Zeilenumbruch in die Datei
+            for entry_id in saved_entry_ids:
+                file.write(str(entry_id) + '\n')
+    else:
+        time.sleep(9000)
 
+    
 # Hauptprogramm (z.B. wo der Bot aufgerufen wird)
 if __name__ == "__main__":
     while True:  # Endlosschleife
