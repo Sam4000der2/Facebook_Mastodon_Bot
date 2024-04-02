@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 
 # Customizable Variables
 api_base_url = 'https://sakurajima.moe'  # The base URL of your Mastodon instance
-access_token = 'APIKEY' # Your access token
+access_token = 'api_key' # Your access token
 feed_url = 'https://fetchrss.com/rss/6608692efac5834576331a82660868f40f8d3458ab64bde2.xml'  # Insert RSS feed URL here, I used fetchrss.
     
 def extract_images_from_content(content):
@@ -95,6 +95,7 @@ def main(feed_entries):
         with open("Mastodon.crunchy.en.bot.dat", "w") as file:
             pass
 
+    entry_found = False
     for entry in feed_entries:
         
         title = entry.get('title', '')
@@ -121,6 +122,8 @@ def main(feed_entries):
         
         # Check if the entry_id is already saved
         if entry_id not in saved_entry_ids:
+            
+            entry_found = True
         
             # Parse timestamp
             posted_time_utc = parse(updated)
@@ -158,14 +161,17 @@ def main(feed_entries):
             # Make sure that only the latest 5 entries are kept
             if len(saved_entry_ids) > 5:
                 saved_entry_ids = saved_entry_ids[-5:]
+            time.sleep(1500)
+    if entry_found:
+        # Open the file in write mode (w for write)
+        with open('Mastodon.crunchy.en.bot.dat', 'w') as file:
+            # Write each entry_id followed by a line break in the file
+            for entry_id in saved_entry_ids:
+                file.write(str(entry_id) + '\n')
+    else:
+        time.sleep(900)
     
-    # Open the file in write mode (w for write)
-    with open('Mastodon.crunchy.en.bot.dat', 'w') as file:
-        # Write each entry_id followed by a line break in the file
-        for entry_id in saved_entry_ids:
-            file.write(str(entry_id) + '\n')
-    
-    time.sleep(900)
+
 
 # Main program (where the bot is invoked)
 if __name__ == "__main__":
