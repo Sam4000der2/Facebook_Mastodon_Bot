@@ -1,5 +1,5 @@
 feedparser
-Mastodon
+Mastodon.py
 requests
 python-dateutil
-BeautifulSoup
+beautifulsoup4
