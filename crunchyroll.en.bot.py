@@ -172,8 +172,8 @@ def main(feed_entries):
                     file.write(str(entry_id) + '\n')
             time.sleep(1500)
         
-    else:
-        time.sleep(900)
+    if entry_found != True:    
+        time.sleep(9000)
     
 
 
