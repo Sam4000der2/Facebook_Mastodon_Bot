@@ -149,21 +149,15 @@ def main(feed_entries):
             #Füge die entry_id zur Liste der gespeicherten entry_ids hinzu
             saved_entry_ids.append(entry_id)
             
-            # Stelle sicher, dass nur die neuesten 5 Einträge behalten werden
-            if len(saved_entry_ids) > 5:
-                saved_entry_ids = saved_entry_ids[-5:]
-            
+            # Öffne die Datei im Schreibmodus (w für write)
+            with open('Mastodon.crunchy.bot.dat', 'w') as file:
+                # Schreibe jede entry_id gefolgt von einem Zeilenumbruch in die Datei
+                for entry_id in saved_entry_ids:
+                    file.write(str(entry_id) + '\n')
+            time.sleep(1500)
         
-        time.sleep(1500)
-        
-    if entry_found:
-        # Öffne die Datei im Schreibmodus (w für write)
-        with open('Mastodon.crunchy.bot.dat', 'w') as file:
-            # Schreibe jede entry_id gefolgt von einem Zeilenumbruch in die Datei
-            for entry_id in saved_entry_ids:
-                file.write(str(entry_id) + '\n')
-    else:
-        time.sleep(9000)
+    if entry_found != True:
+        time.sleep(900)
 
     
 # Hauptprogramm (z.B. wo der Bot aufgerufen wird)
