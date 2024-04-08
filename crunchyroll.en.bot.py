@@ -163,7 +163,7 @@ def main(feed_entries):
             saved_entry_ids.append(entry_id)
             
             # Make sure that only the latest 5 entries are kept
-            if len(saved_entry_ids) > 5:
+            if len(saved_entry_ids) > 10:
                 saved_entry_ids = saved_entry_ids[-5:]
             # Open the file in write mode (w for write)
             with open('Mastodon.crunchy.en.bot.dat', 'w') as file:
