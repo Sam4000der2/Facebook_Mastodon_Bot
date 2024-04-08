@@ -132,20 +132,24 @@ def main(feed_entries):
             is_dst = bool(datetime.datetime.now().astimezone().dst())
 
             # Set local timezone (here using Berlin as an example)
-            local_timezone = datetime.timezone(datetime.timedelta(hours=1 if is_dst else 0))  # CEST (UTC+2) or CET (UTC+1)
+            local_timezone = datetime.timezone(datetime.timedelta(hours=8 if is_dst else 7))  # CEST (UTC+2) or CET (UTC+1)
+            utc_timezone = datetime.timezone(datetime.timedelta(hours=0 if is_dst else 0))  # CEST (UTC+2) or CET (UTC+1)
 
             # Convert timestamp to local timezone
             posted_time_local = posted_time_utc.astimezone(local_timezone)
+            posted_time_local_utc = posted_time_utc.astimezone(utc_timezone)
 
             # Define desired format for date and time
-            desired_format = "%d.%m.%Y %H:%M"
+            desired_format = "%m/%d/%Y %H:%M"
+            desired_format_utc = "%d.%m.%Y %H:%M"
 
             # Output timestamp in desired format
+            posted_time_utc = posted_time_local_utc.strftime(desired_format_utc)
             posted_time = posted_time_local.strftime(desired_format)
             
             clean_content = clean_content_keep_links(content)
             clean_content = clean_content.replace("(Feed generated with FetchRSS)", "") 
-            message = f"{clean_content} \n\n#crunchyroll #Anime\n\n{posted_time} (UTC)\n\nLink to original post: {scr_link}"
+            message = f"{clean_content} \n\n#crunchyroll #Anime\n\n{posted_time} (PT)\n{posted_time_utc} (UTC)\n\nLink to original post: {scr_link}"
 
             if image_found:
                 #print (image_urls)
@@ -161,13 +165,13 @@ def main(feed_entries):
             # Make sure that only the latest 5 entries are kept
             if len(saved_entry_ids) > 5:
                 saved_entry_ids = saved_entry_ids[-5:]
+            # Open the file in write mode (w for write)
+            with open('Mastodon.crunchy.en.bot.dat', 'w') as file:
+                # Write each entry_id followed by a line break in the file
+                for entry_id in saved_entry_ids:
+                    file.write(str(entry_id) + '\n')
             time.sleep(1500)
-    if entry_found:
-        # Open the file in write mode (w for write)
-        with open('Mastodon.crunchy.en.bot.dat', 'w') as file:
-            # Write each entry_id followed by a line break in the file
-            for entry_id in saved_entry_ids:
-                file.write(str(entry_id) + '\n')
+        
     else:
         time.sleep(900)
     
